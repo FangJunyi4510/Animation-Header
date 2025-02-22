@@ -1,0 +1,35 @@
+ 187   CurTime:  291371.671ms   Delta:  1515.004ms   avg:  1558.137ms   bias: - 43.133ms   -2.768%
+ 188   CurTime:  292947.872ms   Delta:  1576.201ms   avg:  1558.233ms   bias: + 17.968ms   +1.153%
+ 189   CurTime:  294502.500ms   Delta:  1554.628ms   avg:  1558.214ms   bias: -  3.586ms   -0.230%
+ 190   CurTime:  296061.497ms   Delta:  1558.997ms   avg:  1558.218ms   bias: +  0.779ms   +0.050%
+ 191   CurTime:  297841.156ms   Delta:  1779.659ms   avg:  1559.377ms   bias: +220.282ms   +14.126%^C
+
+  76   CurTime:  118474.858ms   Delta:  1602.650ms   avg:  1558.879ms   bias: + 43.771ms   +2.808%   SD:   38.346ms
+  77   CurTime:  119991.818ms   Delta:  1516.960ms   avg:  1558.335ms   bias: - 41.375ms   -2.655%   SD:   38.391ms
+  78   CurTime:  121562.862ms   Delta:  1571.044ms   avg:  1558.498ms   bias: + 12.546ms   +0.805%   SD:   38.168ms
+  79   CurTime:  123152.523ms   Delta:  1589.661ms   avg:  1558.892ms   bias: + 30.769ms   +1.974%   SD:   38.085ms^C
+
+
+ 190   CurTime:  296005.981ms   Delta:  1554.409ms   avg:  1557.926ms   SD:   47.571ms   bias: -  3.517ms   -0.226%
+ 191   CurTime:  297575.305ms   Delta:  1569.324ms   avg:  1557.985ms   SD:   47.453ms   bias: + 11.339ms   +0.728%
+ 192   CurTime:  299138.012ms   Delta:  1562.707ms   avg:  1558.010ms   SD:   47.330ms   bias: +  4.697ms   +0.301%
+ 193   CurTime:  300671.120ms   Delta:  1533.108ms   avg:  1557.881ms   SD:   47.240ms   bias: - 24.773ms   -1.590%
+ 194   CurTime:  302289.128ms   Delta:  1618.008ms   avg:  1558.191ms   SD:   47.315ms   bias: + 59.817ms   +3.839%^C
+
+ 190   CurTime:  296055.884ms   Delta:  1571.517ms   avg:  1558.188ms   SD:   49.037ms   bias: + 13.329ms   +0.855%
+ 191   CurTime:  297658.824ms   Delta:  1602.940ms   avg:  1558.423ms   SD:   49.015ms   bias: + 44.517ms   +2.857%
+ 192   CurTime:  299209.270ms   Delta:  1550.446ms   avg:  1558.381ms   SD:   48.890ms   bias: -  7.935ms   -0.509%
+ 193   CurTime:  300695.882ms   Delta:  1486.612ms   avg:  1558.009ms   SD:   49.035ms   bias: - 71.397ms   -4.583%
+ 194   CurTime:  302325.661ms   Delta:  1629.779ms   avg:  1558.379ms   SD:   49.178ms   bias: + 71.400ms   +4.582%^C
+
+ 190   CurTime:  296110.026ms   Delta:  1595.779ms   avg:  1558.473ms   SD:   49.189ms   bias: + 37.306ms   +2.394%
+ 191   CurTime:  297648.405ms   Delta:  1538.379ms   avg:  1558.368ms   SD:   49.081ms   bias: - 19.989ms   -1.283%
+ 192   CurTime:  299209.989ms   Delta:  1561.584ms   avg:  1558.385ms   SD:   48.952ms   bias: +  3.199ms   +0.205%
+ 193   CurTime:  300750.784ms   Delta:  1540.795ms   avg:  1558.294ms   SD:   48.841ms   bias: - 17.499ms   -1.123%
+ 194   CurTime:  302365.393ms   Delta:  1614.609ms   avg:  1558.584ms   SD:   48.882ms   bias: + 56.025ms   +3.595%^C
+
+ 190   CurTime:  296160.394ms   Delta:  1612.332ms   avg:  1558.738ms   SD:  151.073ms   bias: + 53.594ms   +3.438%
+ 191   CurTime:  297681.306ms   Delta:  1520.912ms   avg:  1558.540ms   SD:  150.699ms   bias: - 37.628ms   -2.414%
+ 192   CurTime:  299252.375ms   Delta:  1571.069ms   avg:  1558.606ms   SD:  150.307ms   bias: + 12.463ms   +0.800%
+ 193   CurTime:  300827.473ms   Delta:  1575.098ms   avg:  1558.691ms   SD:  149.920ms   bias: + 16.407ms   +1.053%
+ 194   CurTime:  302359.028ms   Delta:  1531.555ms   avg:  1558.551ms   SD:  149.544ms   bias: - 26.996ms   -1.732%^C
