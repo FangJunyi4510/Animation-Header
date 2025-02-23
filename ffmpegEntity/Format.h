@@ -2,6 +2,7 @@
 
 #include "Codec.h"
 #include <array>
+#include "../../../include/Char033.h"
 
 namespace my_ffmpeg{
 
@@ -95,10 +96,11 @@ public:
 			streams[context->streams[packet.data()->stream_index]->codecpar->codec_type].packets.push_back(packet);
 			packet.unref();
 		}
-
+		std::clog<<c033::pGreen;
 		for(uint i=0;i<context->nb_streams;++i){
 			av_dump_format(context,i,url.c_str(),0);// debug
 		}
+		std::clog<<c033::pNone;
 		avformat_close_input(&context);
 	}
 	SWAP(FormatInput){
@@ -147,9 +149,11 @@ public:
 			}
 			each->configure();
 		}
+		std::clog<<c033::pGreen;
 		for(uint i=0;i<context->nb_streams;++i){
 			av_dump_format(context,i,filename.c_str(),1);// debug
 		}
+		std::clog<<c033::pNone;
 	}
 	void encode(AVMediaType type,const vector<Frame>& frames){
 		if(!encoders[type]){

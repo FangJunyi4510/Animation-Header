@@ -5,11 +5,11 @@
 
 namespace anim{
 
-class AbstractImage;
+class AbstractAnimation;
 
 using Point=std::complex<double>;
 using Vector=Point;
-using pImage=std::shared_ptr<AbstractImage>;
+using pAnim=std::shared_ptr<AbstractAnimation>;
 
 }
 

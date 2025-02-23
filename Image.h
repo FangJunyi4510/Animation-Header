@@ -9,20 +9,29 @@ namespace anim{
 
 using namespace my_ffmpeg;
 
-class AbstractImage{
+class AbstractAnimation{
+	double m_time=0;
 	mutable bool isLoaded=false;
 public:
-	AbstractImage(){}
-	SWAP(AbstractImage){
+	AbstractAnimation(){}
+	SWAP(AbstractAnimation){
 		std::swap(isLoaded,o.isLoaded);
+		std::swap(m_time,o.m_time);
 	}
-	COPY(AbstractImage):isLoaded(false){};
+	COPY(AbstractAnimation):m_time(o.m_time),isLoaded(false){};
 
 	Color operator[](Point pos)const{
 		load();
 		return getPixelV(pos);
 	}
-	pImage clone()const{
+	double time()const{
+		return m_time;
+	}
+	void setTime(double newTime){
+		unload();
+		m_time=newTime;
+	}
+	pAnim clone()const{
 		auto ret=cloneV();
 		assert(typeid(*ret)==typeid(*this) && "子类未重写 cloneV()");
 		return ret;
@@ -35,7 +44,7 @@ public:
 		isLoaded=false;
 	}
 
-	virtual ~AbstractImage()noexcept{}
+	virtual ~AbstractAnimation()noexcept{}
 
 protected:
 	void load()const{
@@ -45,48 +54,53 @@ protected:
 		loadV();
 		isLoaded=true;
 	}
-	virtual pImage cloneV()const=0;
+	virtual pAnim cloneV()const=0;
 	virtual Color getPixelV(Point pos)const=0;
 	virtual void loadV()const=0;
 	virtual void unloadV()const=0;
 };
 
-class MappedImage:public AbstractImage{
-	pImage m_source;
+class MappedAnimation:virtual public AbstractAnimation{
+	pAnim m_source;
 public:
-	MappedImage(pImage source=nullptr):m_source(source){}
-	SWAP(MappedImage){
-		AbstractImage::swap(o);
+	MappedAnimation(pAnim source=nullptr):m_source(source){}
+	SWAP(MappedAnimation){
+		AbstractAnimation::swap(o);
 		std::swap(m_source,o.m_source);
 	}
-	COPY(MappedImage):AbstractImage(o),m_source(o.m_source->clone()){}
+	COPY(MappedAnimation):AbstractAnimation(o),m_source(o.m_source->clone()){}
 
-	pImage source()const{
+	pAnim source()const{
 		return m_source;
 	}
-	void setSource(const pImage& newSource){
+	void setSource(const pAnim& newSource){
 		m_source=newSource;
 	}
 protected:
-	void loadV()const override{}
-	void unloadV()const override{
-		if(!m_source){
+	void loadV()const override{
+		if(!source()){
 			return;
 		}
-		m_source->unload();
+		source()->setTime(time());
+	}
+	void unloadV()const override{
+		if(!source()){
+			return;
+		}
+		source()->unload();
 	}
 };
 
-class MovedImage:public MappedImage{
+class MovedAnimation:public MappedAnimation{
 	Vector m_offset;
 public:
-	MovedImage(pImage source=nullptr, Vector offset=Vector()):MappedImage(source), m_offset(offset){}
-	SWAP(MovedImage){
-		MappedImage::swap(o);
+	MovedAnimation(pAnim source, Vector offset=Vector()):MappedAnimation(source), m_offset(offset){}
+	SWAP(MovedAnimation,nullptr){
+		MappedAnimation::swap(o);
 		std::swap(m_offset,o.m_offset);
 	}
-	COPY(MovedImage)=default;
-	CLONE(cloneV,MovedImage,pImage)
+	COPY(MovedAnimation)=default;
+	CLONE(cloneV,MovedAnimation,pAnim)
 
 	Vector offset()const{
 		return m_offset;
@@ -100,16 +114,16 @@ protected:
 	}
 };
 
-class RotatedImage: public MappedImage{
+class RotatedAnimation: public MappedAnimation{
 	Vector m_rotate;
 public:
-	RotatedImage(pImage source=nullptr,Vector rotate=Vector(1)):MappedImage(source),m_rotate(rotate){}
-	SWAP(RotatedImage){
-		MappedImage::swap(o);
+	RotatedAnimation(pAnim source,Vector rotate=Vector(1)):MappedAnimation(source),m_rotate(rotate){}
+	SWAP(RotatedAnimation,nullptr){
+		MappedAnimation::swap(o);
 		std::swap(m_rotate,o.m_rotate);
 	}
-	COPY(RotatedImage)=default;
-	CLONE(cloneV,RotatedImage,pImage)
+	COPY(RotatedAnimation)=default;
+	CLONE(cloneV,RotatedAnimation,pAnim)
 
 	Vector rotate()const{
 		return m_rotate;
@@ -123,168 +137,160 @@ protected:
 	}
 };
 
-class GroupImage: public AbstractImage{
-	struct SingleImage{
-		int z_index;
-		pImage source;
-		Vector offset,rotate;
-		SingleImage(int z,pImage s,Vector off,Vector rot):z_index(z),source(s),offset(off),rotate(rot){}
-		pImage toImage(){
-			return pImage(new MovedImage(pImage(new RotatedImage(source,rotate)),offset));
-		}
-	};
-	
-	std::set<pImage> innerImages;
+class GroupAnimation: public AbstractAnimation,public std::set<pAnim>{
 public:
-	GroupImage(){}
-	SWAP(GroupImage){
-		AbstractImage::swap(o);
-		std::swap(innerImages,o.innerImages);
+	GroupAnimation(){}
+	GroupAnimation(const std::set<pAnim>& srcs):std::set<pAnim>(srcs){}
+	SWAP(GroupAnimation){
+		AbstractAnimation::swap(o);
+		std::set<pAnim>::swap(o);
 	}
-	COPY(GroupImage){
-		for(const auto& each:o.innerImages){
-			innerImages.insert(each->clone());
+	COPY(GroupAnimation){
+		for(const auto& each:o){
+			insert(each->clone());
 		}
 	}
-	CLONE(cloneV,GroupImage,pImage)
-	// to do: add remove move rotate
+	CLONE(cloneV,GroupAnimation,pAnim)
 
 protected:
 	Color getPixelV(Point p)const override{
 		Color ret;
-		for(auto each:innerImages){
-			if(ret.alpha==ull(-1)){
+		for(auto each:*this){
+			if(ret.alpha==Color::max){
 				break;
 			}
 			ret+=(*each)[p];
 		}
 		return ret;
 	}
-	void loadV()const override{}
+	void loadV()const override{
+		for(auto& each:*this){
+			each->setTime(time());
+		}
+	}
 	void unloadV()const override{
-		for(auto& each:innerImages){
+		for(const auto& each:*this){
 			each->unload();
 		}
 	}
 };
 
-// class BufferImage:public AbstractImage{
-// protected:
-// 	mutable RGBABuffer buf;
-// public:
-// 	BufferImage(){}
-// 	BufferImage(const Frame& data):buf(data.toRGBA()){}
-// 	SWAP(BufferImage){
-// 		AbstractImage::swap(o);
-// 		std::swap(buf,o.buf);
-// 	}
-// 	COPY(BufferImage):buf(){}
+class BufferImage:virtual public AbstractAnimation{
+protected:
+	mutable VideoFrame buf;
+public:
+	BufferImage(){}
+	BufferImage(const Frame& data):buf(data){}
+	SWAP(BufferImage){
+		AbstractAnimation::swap(o);
+		std::swap(buf,o.buf);
+	}
+	COPY(BufferImage):buf(0,0){}
 	
-// 	int width()const{
-// 		load();
-// 		if(buf.empty()){
-// 			return 0;
-// 		}
-// 		return buf[0].size();
-// 	}
-// 	int height()const{
-// 		load();
-// 		return buf.size();
-// 	}
-// protected:
-// 	Color getPixelV(Point p)const override{
-// 		double px=p.real(),py=height()-p.imag();
-// 		px=lim(px,0.0,width()-1.0);
-// 		py=lim(py,0.0,height()-1.0);
-// 		int rx=floor(px),ry=floor(py);
-// 		int wx=px-rx,wy=py-ry;
-// 		int rxright=lim(rx+1,0,width()-1),rybottom=lim(ry+1,0,height()-1);
-// 		Color t=buf[ry][rx];
-// 		Color tr=buf[rybottom][rx];
-// 		Color tb=buf[ry][rxright];
-// 		Color trb=buf[rybottom][rxright];
-// 		return t;
-// 		return avg(avg(t,tr,wy),avg(tb,trb,wy),wx);
-// 	}
-// 	void unloadV()const override{
-// 		buf.clear();
-// 	}
+	int width()const{
+		load();
+		return buf.width();
+	}
+	int height()const{
+		load();
+		return buf.height();
+	}
+	VideoFrame toFrame()const{
+		load();
+		// std::cerr<<"toFrame return\n";
+		return buf;
+	}
+protected:
+	Color getPixelV(Point p)const override{
+		double px=height()-p.imag(),py=p.real();
+		if(px<0 || px>height() || py<0 || py>width()){
+			return Color();
+		}
+		px=lim(px,0.0,height()-1.0);
+		py=lim(py,0.0,width()-1.0);
+		int rx=floor(px),ry=floor(py);
+		double wx=px-rx,wy=py-ry;
+		int rxbottom=lim(rx+1,0,height()-1),ryright=lim(ry+1,0,width()-1);
+
+		/*
+		 -y-------
+		| t1    t2
+		x    p
+		|
+		| t3    t4
+		
+		*/
+		Color t1=buf[rx][ry];
+		Color t2=buf[rx][ryright];
+		Color t3=buf[rxbottom][ry];
+		Color t4=buf[rxbottom][ryright];
+		return avg(avg(t1,t2,wy),avg(t3,t4,wy),wx);
+	}
+	void unloadV()const override{
+		buf.clear();
+	}
+};
+
+class FrameImage:public BufferImage{
+	Frame m_data;
+public:
+	FrameImage():m_data(){}
+	FrameImage(const Frame& data):m_data(data){}
+	SWAP(FrameImage){
+		BufferImage::swap(o);
+		m_data.swap(o.m_data);
+	}
+	COPY(FrameImage)=default;
+	CLONE(cloneV,FrameImage,pAnim)
+
+protected:
+	void loadV()const override{
+		buf=m_data;
+	}
+};
+
+class RectangleAnimation:public BufferImage,public MappedAnimation{
+	int width=0;
+	int height=0;
+	Point begin,end;
+public:
+	RectangleAnimation(pAnim source,int w,int h,Point begin_,Point end_):MappedAnimation(source),width(w),height(h),begin(begin_),end(end_){}
+	SWAP(RectangleAnimation,nullptr,0,0,Point(),Point()){
+		BufferImage::swap(o);
+		MappedAnimation::swap(o);
+		std::swap(width,o.width);
+		std::swap(height,o.height);
+		std::swap(begin,o.begin);
+		std::swap(end,o.end);
+	}
+	COPY(RectangleAnimation)=default;
+	CLONE(cloneV,RectangleAnimation,pAnim)
+
+protected:
+	void loadV()const override{
+		// std::cerr<<"MappedAnimation::loadV() be\n";
+		MappedAnimation::loadV();
+		// std::cerr<<"MappedAnimation::loadV()\n";
+
+		buf={width,height};
+		Vector step=end-begin;
+		step={step.real()/width,step.imag()/height};
+		// std::cerr<<"loading source="<<source()<<"\n";
+		for(int i=0;i<height;++i){
+			for(int j=0;j<width;++j){
+				buf[i][j]=(*source())[begin+i*step.imag()+j*step.real()];
+			}
+		}
+		// std::cerr<<"loading source return\n";
+	}
+	void unloadV()const override{
+		BufferImage::unloadV();
+		MappedAnimation::unloadV();
+	}
+};
+
+// class TextImage:public {
+
 // };
-
-// class UrlImage:public BufferImage{
-// 	string m_url;
-// public:
-// 	UrlImage(string url=""):m_url(url){}
-// 	SWAP(UrlImage){
-// 		BufferImage::swap(o);
-// 		std::swap(m_url,o.m_url);
-// 	}
-// 	COPY(UrlImage):m_url(o.m_url){}
-// 	CLONE(cloneV,UrlImage,pImage)
-// protected:
-// 	void loadV()const override{
-// 		FormatInput src(m_url);
-// 		Frame firstFrame;
-// 		for(auto& pkt:src.packets()){
-// 			if(src.getType(pkt)==AVMEDIA_TYPE_VIDEO){
-// 				auto tmp=src.decode({pkt});
-// 				if(tmp.empty()){
-// 					continue;
-// 				}
-// 				firstFrame=tmp[0];
-// 				break;
-// 			}
-// 		}
-// 		buf=firstFrame.toRGBA();
-// 	}
-// };
-
-// class FrameImage:public BufferImage{
-// 	Frame m_data;
-// public:
-// 	FrameImage():m_data(){}
-// 	FrameImage(const Frame& data):m_data(data){}
-// 	SWAP(FrameImage){
-// 		BufferImage::swap(o);
-// 		m_data.swap(o.m_data);
-// 	}
-// 	COPY(FrameImage):m_data(o.m_data){}
-// 	CLONE(cloneV,FrameImage,pImage)
-
-// protected:
-// 	void loadV()const override{
-// 		buf=m_data.toRGBA();
-// 	}
-// };
-
-// class PacketImage:public BufferImage{
-// 	Packet m_data;
-// 	FormatInput* m_file;
-// 	uint index=0;
-// public:
-// 	PacketImage():m_data(){}
-// 	PacketImage(const Packet& data,FormatInput& file,uint idx=0):m_data(data),m_file(&file),index(idx){}
-// 	SWAP(PacketImage){
-// 		BufferImage::swap(o);
-// 		m_data.swap(o.m_data);
-// 		std::swap(m_file,o.m_file);
-// 		std::swap(index,o.index);
-// 	}
-// 	COPY(PacketImage):m_data(o.m_data),m_file(o.m_file),index(o.index){}
-// 	CLONE(cloneV,PacketImage,pImage)
-
-// protected:
-// 	void loadV()const override{
-// 		auto frames=m_file->decode({m_data});
-// 		const Frame* target=nullptr;
-// 		if(index>=frames.size()){
-// 			target=&frames.back();
-// 		}else{
-// 			target=&frames[index];
-// 		}
-// 		buf=target->toRGBA();
-// 	}
-// };
-
 
 }

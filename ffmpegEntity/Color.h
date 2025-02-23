@@ -28,20 +28,18 @@ using std::max;
 
 using ull=unsigned long long;
 using ushort=unsigned short;
+
+class Color;
+Color operator+(const Color& a,const Color& b);
+Color operator-(const Color& a,const Color& b);
+
 class Color{
 public:
+	static const ushort max=0xffff;
 	ushort red=0,green=0,blue=0,alpha=0;
 	Color(){}
-	Color(ushort r,ushort g,ushort b,ushort a=0xffff):
+	Color(ushort r,ushort g,ushort b,ushort a=max):
 		red(r),green(g),blue(b),alpha(a){}
-	Color operator+(Color o)const{
-		o.alpha=max(o.alpha,ushort(-alpha-1));
-		return Color(avg(red,o.red,alpha,o.alpha),avg(green,o.green,alpha,o.alpha),avg(blue,o.blue,alpha,o.alpha),alpha+o.alpha);
-	}
-	Color operator-(Color o)const{
-		o.alpha=max(o.alpha,alpha);
-		return Color(avg(red,o.red,alpha,ushort(-o.alpha)),avg(green,o.green,alpha,ushort(-o.alpha)),avg(blue,o.blue,alpha,ushort(-o.alpha)),alpha-o.alpha);
-	}
 	Color& operator+=(const Color& o){
 		return *this=*this+o;
 	}
@@ -64,12 +62,15 @@ std::ostream& operator<<(std::ostream& out,const anim::Color& c);
 using std::string;
 using std::vector;
 
+#define CLONE_(clone,T,pT) \
+	pT clone()const{return static_cast<pT>(new T(*this));}
 #define CLONE(clone,T,pT) \
-	pT clone()const{return static_cast<pT>(new T(*this));} \
-	T& operator=(T o)noexcept{swap(o);return *this;}
+	CLONE_(clone,T,pT) \
+	T& operator=(const T& o){T t(o);swap(t);return *this;} 
 #define COPY(T) \
 	T(const T& o)
 #define SWAP(T,...) \
 	T(T&& o)noexcept:T(__VA_ARGS__){swap(o);} \
 	void swap(T&& o)noexcept{swap(o);}\
+	T& operator=(T&& o)noexcept{swap(o);return *this;} \
 	void swap(T& o)noexcept

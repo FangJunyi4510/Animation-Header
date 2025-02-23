@@ -148,6 +148,7 @@ class VideoFrame{
 	using RGBABuffer=std::vector<RGBALine>;
 	RGBABuffer data;
 public:
+	VideoFrame():VideoFrame(0,0){}
 	VideoFrame(int width,int height,Color color=Color()):data(height,RGBALine(width,color)){}
 	VideoFrame(my_ffmpeg::Frame frame):VideoFrame(frame.data()->width,frame.data()->height){
 		frame=my_ffmpeg::Swscale(frame,{width(),height(),AV_PIX_FMT_RGBA64}).scale(frame);
@@ -157,6 +158,9 @@ public:
 				data[i][j]=Color(pixel[0],pixel[1],pixel[2],pixel[3]);
 			}
 		}
+	}
+	void clear(){
+		*this=VideoFrame();
 	}
 	int width()const{
 		if(data.empty()){
