@@ -221,7 +221,7 @@ public:
 
 class AudioEncoder:public Encoder{
 protected:
-	anim::AudioBuffer buffer;
+	AudioBuffer buffer;
 	double step()const override{
 		return context->frame_size*1.0/context->sample_rate;
 	}

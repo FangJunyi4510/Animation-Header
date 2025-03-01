@@ -9,15 +9,16 @@ else()
 endif()
 
 set(SOURCES
-    ./Image.cpp
-    ./Basic.cpp
+    Animation/Animation.cpp
+    Animation/Basic.cpp
 )
-add_compile_options(-std=c++17 -Wall -Wextra)
+add_compile_options(-std=c++17 -Wall -Wextra -Werror)
 
 add_subdirectory(./FFmpegEntity)
 
 add_library(Animation ${SOURCES})
 target_link_libraries(Animation FFmpegEntity)
+target_include_directories(Animation PUBLIC Animation)
 
 add_executable(Test ./Test.cpp)
 target_link_libraries(Test Animation)

@@ -1,5 +1,5 @@
-#include "Image.h"
-#include "../../include/Char033.h"
+#include "Animation.h"
+#include "Char033.h"
 #include <bits/stdc++.h>
 using namespace anim;
 using namespace std;
@@ -13,7 +13,7 @@ double getTick(double realTime){
 	return (realTime-4.05)/1.558551;
 }
 pair<vector<Frame>,AVRational> getAudio(){
-	FormatInput src("src/起风了.mpga");
+	FormatInput src("resource/起风了.mpga");
 	return {src.read(AVMEDIA_TYPE_AUDIO),src.getTimeBase(AVMEDIA_TYPE_AUDIO)};
 }
 
@@ -23,7 +23,7 @@ int main(){
 	RectangleAnimation video(pAnim(product),1920,1080,{0,1920},{1080,0});
 
 	auto [audio,timeBase]=getAudio();
-	FormatOutput out("out/out.mp4",{
+	FormatOutput out("output/out.mp4",{
 		new VideoEncoder({1920,1080,AV_PIX_FMT_YUV420P},AV_CODEC_ID_H264,30,0,{{"preset","ultrafast"}}),
 		new AudioEncoder(AudioFormat(AV_CHANNEL_LAYOUT_STEREO,AV_SAMPLE_FMT_FLTP,44100),AV_CODEC_ID_AAC)
 	});

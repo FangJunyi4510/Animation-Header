@@ -35,8 +35,8 @@
 .vscode/
 *.code-workspace
 
-src/
-out/
+resource/
+output/
 
 # Qt
 build

@@ -4,19 +4,24 @@ project(FFmpegEntity)
 
 # 所有源文件
 set(SOURCES
-	./Format.cpp
-	./Codec.cpp
-	./Frame.cpp
-	./Color.cpp
+	Format/Format.cpp
+	Codec/Codec.cpp
+	Frame/Frame.cpp
+	Basic/Color.cpp
 )
-
-add_compile_options(-std=c++17 -Wall -Wextra)
 
 add_library(FFmpegEntity ${SOURCES})
 
-link_directories()
+target_include_directories(FFmpegEntity PUBLIC
+	Format
+	Codec
+	Frame
+	Basic
+	${CMAKE_SOURCE_DIR}/../../include
+)
 
-set(FFmpegLibraries
+# 链接到 FFmpeg 库
+target_link_libraries(FFmpegEntity 
 	/lib/x86_64-linux-gnu/libavcodec.so
 	/lib/x86_64-linux-gnu/libavfilter.so
 	/lib/x86_64-linux-gnu/libavutil.so
@@ -25,6 +30,3 @@ set(FFmpegLibraries
 	/lib/x86_64-linux-gnu/libavformat.so
 	/lib/x86_64-linux-gnu/libswresample.so
 )
-
-# 链接到 FFmpeg 库
-target_link_libraries(FFmpegEntity ${FFmpegLibraries})

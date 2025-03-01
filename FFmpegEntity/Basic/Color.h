@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 
-namespace anim{
+namespace my_ffmpeg{
 
 template<class T>
 T lim(const T& a,const T& min,const T& max){
@@ -56,7 +56,7 @@ Color avg(Color a,Color b,W wa){
 }
 
 namespace std{
-std::ostream& operator<<(std::ostream& out,const anim::Color& c);
+std::ostream& operator<<(std::ostream& out,const my_ffmpeg::Color& c);
 }
 
 using std::string;
@@ -68,7 +68,7 @@ using std::vector;
 	CLONE_(clone,T,pT) \
 	T& operator=(const T& o){T t(o);swap(t);return *this;} 
 #define COPY(T) \
-	T(const T& o)
+	T([[maybe_unused]]const T& o)
 #define SWAP(T,...) \
 	T(T&& o)noexcept:T(__VA_ARGS__){swap(o);} \
 	void swap(T&& o)noexcept{swap(o);}\

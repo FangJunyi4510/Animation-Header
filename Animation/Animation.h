@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ffmpegEntity/Format.h"
+#include "Format.h"
 #include "Basic.h"
 #include <set>
 #include <cassert>
@@ -145,7 +145,7 @@ public:
 		AbstractAnimation::swap(o);
 		std::set<pAnim>::swap(o);
 	}
-	COPY(GroupAnimation){
+	COPY(GroupAnimation):AbstractAnimation(),std::set<pAnim>(){
 		for(const auto& each:o){
 			insert(each->clone());
 		}
@@ -185,7 +185,7 @@ public:
 		AbstractAnimation::swap(o);
 		std::swap(buf,o.buf);
 	}
-	COPY(BufferImage):buf(0,0){}
+	COPY(BufferImage):AbstractAnimation(),buf(0,0){}
 	
 	int width()const{
 		load();

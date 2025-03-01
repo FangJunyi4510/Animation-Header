@@ -1,9 +1,9 @@
 #include "Color.h"
 
-std::ostream& std::operator<<(std::ostream& out,const anim::Color& c){
+std::ostream& std::operator<<(std::ostream& out,const my_ffmpeg::Color& c){
 	return out<<"RGBA64("<<c.red<<","<<c.green<<","<<c.blue<<","<<c.alpha<<")";
 }
-namespace anim{
+namespace my_ffmpeg{
 
 Color operator+(const Color& a,const Color& b){
 	Color t=b;

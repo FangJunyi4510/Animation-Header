@@ -11,6 +11,7 @@ extern "C"{
 }
 #include <sstream>
 #include <deque>
+using std::deque;
 
 namespace my_ffmpeg{
 
@@ -137,11 +138,6 @@ public:
 	}
 	COPY(SwResample)=delete;
 };
-
-}
-using std::deque;
-
-namespace anim{
 
 class VideoFrame{
 	using RGBALine=std::vector<Color>;
