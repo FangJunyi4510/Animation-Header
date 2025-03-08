@@ -17,8 +17,11 @@ add_compile_options(-std=c++17 -Wall -Wextra -Werror)
 add_subdirectory(./FFmpegEntity)
 
 add_library(Animation ${SOURCES})
-target_link_libraries(Animation FFmpegEntity)
-target_include_directories(Animation PUBLIC Animation)
+target_link_libraries(Animation PUBLIC FFmpegEntity)
+target_include_directories(Animation PUBLIC
+    Animation
+	${CMAKE_SOURCE_DIR}/../../include
+)
 
 add_executable(Test ./Test.cpp)
 target_link_libraries(Test Animation)

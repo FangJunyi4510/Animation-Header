@@ -3,10 +3,7 @@
 #include <vector>
 #include <stdexcept>
 #include <iostream>
-#include "../ffmpegEntity/Format.h"
-/*
-g++ tools/printTextToPixel.cpp -o out/printTextToPixel -lfreetype -I/usr/include/freetype2 ffmpegEntity/Format.o ffmpegEntity/Codec.o ffmpegEntity/Frame.o ffmpegEntity/Color.o animBasic.o ../../include/Char033.h /lib/x86_64-linux-gnu/libavcodec.so /lib/x86_64-linux-gnu/libavdevice.so /lib/x86_64-linux-gnu/libavfilter.so /lib/x86_64-linux-gnu/libavformat.so /lib/x86_64-linux-gnu/libavutil.so /lib/x86_64-linux-gnu/libswscale.so /lib/x86_64-linux-gnu/libswresample.so
-*/
+
 
 // 定义像素结构 (RGBA)
 using Pixel=anim::Color;
@@ -96,13 +93,13 @@ int main() {
     } catch (const std::exception& e) {
         std::cerr << "错误: " << e.what() << std::endl;
     }
-    anim::VideoFrame frame(100,100);
-    for(int i=0;i<100;++i){
-        for(int j=0;j<100;++j){
-            frame[i][j]=matrix[i][j];
-        }
-    }
-    my_ffmpeg::FormatOutput out("1.png",{new my_ffmpeg::VideoEncoder({100,100,AV_PIX_FMT_RGBA},AV_CODEC_ID_PNG)});
-    out.encode(AVMEDIA_TYPE_VIDEO,{frame.toFrame()});
+    // anim::VideoFrame frame(100,100);
+    // for(int i=0;i<100;++i){
+    //     for(int j=0;j<100;++j){
+    //         frame[i][j]=matrix[i][j];
+    //     }
+    // }
+    // my_ffmpeg::AVOutput out("1.png",{new my_ffmpeg::VideoEncoder({100,100,AV_PIX_FMT_RGBA},AV_CODEC_ID_PNG)});
+    // out.encode(AVMEDIA_TYPE_VIDEO,{frame.toFrame()});
     return 0;
 }
