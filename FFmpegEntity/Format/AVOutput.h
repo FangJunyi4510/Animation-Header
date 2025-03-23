@@ -7,7 +7,7 @@
 namespace my_ffmpeg{
 
 class AVOutput:public AVFormat{
-	std::array<Encoder*,AVMEDIA_TYPE_NB> encoders={};
+	std::array<Encoder*,AVMEDIA_TYPE_NB> encoders={nullptr};
 public:
 	AVOutput(string filename,const vector<Encoder*>& arg_encoders);
 	SWAP(AVOutput,"",{}){

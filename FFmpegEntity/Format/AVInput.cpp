@@ -1,5 +1,6 @@
 #include "AVInput.h"
 #include <cassert>
+#include <iostream>
 
 namespace my_ffmpeg{
 
@@ -11,12 +12,10 @@ vector<Frame> AVInput::read(AVMediaType type,int maxCount){
 }
 AVInput::AVInput(string url){
 	if(avformat_open_input(&context,url.c_str(),nullptr,nullptr)){
-		assert(!"open failed");
-		return;
+		throw FileError("Cannot open file "+url);
 	}
 	if(avformat_find_stream_info(context,nullptr)){
-		assert(!"finding stream info failed");
-		return;
+		throw FileError("invalid file "+url);
 	}
 	for(u_int i=0;i<context->nb_streams;++i){
 		auto type=context->streams[i]->codecpar->codec_type;
@@ -38,10 +37,12 @@ bool AVInput::Stream::isEmptyBuffer(){
 	if(!buffer.empty() || !packets.empty()){
 		return false;
 	}
-	decoder.flush();
+	decoder.end();
 	pushBuffer(decoder.receive());
 	return buffer.empty();
 }
+
+
 bool AVInput::Stream::decodeOne(){
 	while(buffer.empty()){
 		if(isEmptyBuffer()){

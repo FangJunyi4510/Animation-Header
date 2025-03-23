@@ -23,7 +23,7 @@ vector<Packet> Encoder::aftertreat(const vector<Packet>& products)const{
 Encoder::Encoder(AVCodecID id,int64_t bit_rate,const std::map<std::string,std::string>& opts){
 	codec=avcodec_find_encoder(id);
 	if(!codec){
-		return;
+		throw CodecError("No available encoder");
 	}
 	context=avcodec_alloc_context3(codec);
 	context->codec_id = id;

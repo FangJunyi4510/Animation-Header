@@ -6,21 +6,23 @@ namespace my_ffmpeg{
 
 class Color;
 Color operator+(const Color& a,const Color& b);
-Color operator-(const Color& a,const Color& b);
 
 class Color{
 public:
 	static const ushort max=0xffff;
-	ushort red=0,green=0,blue=0,alpha=0;
-	Color(){}
-	Color(ushort r,ushort g,ushort b,ushort a=max);
-	Color& operator+=(const Color& o);
-	Color& operator-=(const Color& o);
+	ull rgba=0x000000000000ffff;
+	Color(ull rgba_=0x000000000000ffff):rgba(rgba_){}
+	Color(ushort r,ushort g,ushort b,ushort a=max):rgba((ull(r)<<48)|(ull(g)<<32)|(ull(b)<<16)|a){}
+	Color& operator+=(const Color& o) {return *this=*this+o;}
+	ushort red()const	{return (rgba>>48)&0xffff;}
+	ushort green()const	{return (rgba>>32)&0xffff;}
+	ushort blue()const	{return (rgba>>16)&0xffff;}
+	ushort alpha()const	{return rgba&0xffff;}
 };
 
 template<class W>
 Color avg(Color a,Color b,W wa){
-	return Color(avg(a.red,b.red,wa),avg(a.green,b.green,wa),avg(a.blue,b.blue,wa),avg(a.alpha,b.alpha,wa));
+	return Color(avg(a.rgba,b.rgba,wa));
 }
 
 }

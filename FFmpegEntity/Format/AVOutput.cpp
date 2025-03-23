@@ -13,12 +13,10 @@ AVOutput::AVOutput(string filename,const vector<Encoder*>& arg_encoders){
 		encoder=each;
 	}
 	if(avformat_alloc_output_context2(&context,nullptr,nullptr,filename.c_str())<0){
-		assert(!"init failed");
-		return;
+		throw FFmpegError("init failed");
 	}
 	if(avio_open(&context->pb,filename.c_str(),AVIO_FLAG_WRITE)<0){
-		assert(!"open failed");
-		return;
+		throw FileError("Cannot open file "+filename);
 	}
 	for(auto& each:encoders){
 		if(!each){
@@ -28,8 +26,7 @@ AVOutput::AVOutput(string filename,const vector<Encoder*>& arg_encoders){
 	}
 
 	if(avformat_write_header(context,nullptr)<0){
-		assert(!"write header failed");
-		return;
+		throw FileError("Writing header failed");
 	}
 	for(auto& each:encoders){
 		if(!each){
@@ -65,7 +62,7 @@ void AVOutput::close(){
 		if(!each){
 			continue;
 		}
-		each->flush();
+		each->end();
 	}
 	flush();
 	av_write_trailer(context);

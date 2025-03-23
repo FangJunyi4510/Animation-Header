@@ -26,7 +26,7 @@ public:
 	}
 	CLONE(clone,Frame,Frame*)
 	void unref()const;
-	AVFrame* data()const;
+	AVFrame* data()const {return m_data;}
 };
 
 class VideoFrame{
@@ -38,12 +38,13 @@ public:
 	VideoFrame(int width,int height,Color color=Color());
 	VideoFrame(Frame frame);
 	void clear();
-	int width()const;
-	int height()const;
+	int width()const {return data.empty()?0:data[0].size();}
+	int height()const {return data.size();}
+	bool empty()const {return !height() && !width();}
 	void setWidth(int w);
 	void setHeight(int h);
-	RGBALine& operator[](int h);
-	const RGBALine& operator[](int h)const;
+	RGBALine& operator[](int h) {return data[h];}
+	const RGBALine& operator[](int h)const {return data[h];}
 	VideoFormat format()const;
 	Frame toFrame()const;
 	Frame toFrame(VideoFormat resFormat)const;

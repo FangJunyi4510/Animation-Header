@@ -7,6 +7,9 @@ double AudioEncoder::step()const{
 }
 vector<Frame> AudioEncoder::convertFormat(const vector<Frame>& source){
 	buffer.push(source);
+	if(context->frame_size==0){
+		context->frame_size=1024;
+	}
 	return buffer.pop(context->frame_size,buffer.size()/context->frame_size);
 }
 vector<Frame> AudioEncoder::flushBuffer(){

@@ -4,7 +4,8 @@
 #include "Basic.h"
 #include <set>
 #include <cassert>
- 
+#include <iostream> 
+
 namespace anim{ 
 
 using namespace my_ffmpeg;
@@ -20,7 +21,7 @@ public:
 	}
 	COPY(AbstractAnimation):m_time(o.m_time),isLoaded(false){};
 
-	Color operator[](Point pos)const{
+	Color operator[](const Point& pos)const{
 		load();
 		return getPixelV(pos);
 	}
@@ -55,7 +56,7 @@ protected:
 		isLoaded=true;
 	}
 	virtual pAnim cloneV()const=0;
-	virtual Color getPixelV(Point pos)const=0;
+	virtual Color getPixelV(const Point& pos)const=0;
 	virtual void loadV()const=0;
 	virtual void unloadV()const=0;
 };
@@ -63,14 +64,14 @@ protected:
 class MappedAnimation:virtual public AbstractAnimation{
 	pAnim m_source;
 public:
-	MappedAnimation(pAnim source=nullptr):m_source(source){}
+	MappedAnimation(const pAnim& source=nullptr):m_source(source){}
 	SWAP(MappedAnimation){
 		AbstractAnimation::swap(o);
 		std::swap(m_source,o.m_source);
 	}
 	COPY(MappedAnimation):AbstractAnimation(o),m_source(o.m_source->clone()){}
 
-	pAnim source()const{
+	const pAnim& source()const{
 		return m_source;
 	}
 	void setSource(const pAnim& newSource){
@@ -94,7 +95,7 @@ protected:
 class MovedAnimation:public MappedAnimation{
 	Vector m_offset;
 public:
-	MovedAnimation(pAnim source, Vector offset=Vector()):MappedAnimation(source), m_offset(offset){}
+	MovedAnimation(const pAnim& source, const Vector& offset=Vector()):MappedAnimation(source), m_offset(offset){}
 	SWAP(MovedAnimation,nullptr){
 		MappedAnimation::swap(o);
 		std::swap(m_offset,o.m_offset);
@@ -102,14 +103,14 @@ public:
 	COPY(MovedAnimation)=default;
 	CLONE(cloneV,MovedAnimation,pAnim)
 
-	Vector offset()const{
+	const Vector& offset()const{
 		return m_offset;
 	}
 	void setOffset(const Vector& newOffset){
 		m_offset=newOffset;
 	}
 protected:
-	Color getPixelV(Point p)const override{
+	Color getPixelV(const Point& p)const override{
 		return (*source())[p-offset()];
 	}
 };
@@ -117,7 +118,7 @@ protected:
 class RotatedAnimation: public MappedAnimation{
 	Vector m_rotate;
 public:
-	RotatedAnimation(pAnim source,Vector rotate=Vector(1)):MappedAnimation(source),m_rotate(rotate){}
+	RotatedAnimation(const pAnim& source,const Vector& rotate=Vector(1)):MappedAnimation(source),m_rotate(rotate){}
 	SWAP(RotatedAnimation,nullptr){
 		MappedAnimation::swap(o);
 		std::swap(m_rotate,o.m_rotate);
@@ -125,14 +126,14 @@ public:
 	COPY(RotatedAnimation)=default;
 	CLONE(cloneV,RotatedAnimation,pAnim)
 
-	Vector rotate()const{
+	const Vector& rotate()const{
 		return m_rotate;
 	}
-	void setRotate(Vector newRotate){
+	void setRotate(const Vector& newRotate){
 		m_rotate=newRotate;
 	}
 protected:
-	Color getPixelV(Point p)const override{
+	Color getPixelV(const Point& p)const override{
 		return (*source())[p/rotate()];
 	}
 };
@@ -153,10 +154,10 @@ public:
 	CLONE(cloneV,GroupAnimation,pAnim)
 
 protected:
-	Color getPixelV(Point p)const override{
+	Color getPixelV(const Point& p)const override{
 		Color ret;
 		for(auto each:*this){
-			if(ret.alpha==Color::max){
+			if(ret.alpha()==Color::max){
 				break;
 			}
 			ret+=(*each)[p];
@@ -197,11 +198,12 @@ public:
 	}
 	VideoFrame toFrame()const{
 		load();
+		// std::cerr<<"bufferImage toFrame() ==> loaded"<<std::endl;
 		// std::cerr<<"toFrame return\n";
 		return buf;
 	}
 protected:
-	Color getPixelV(Point p)const override{
+	Color getPixelV(const Point& p)const override{
 		double px=height()-p.imag(),py=p.real();
 		if(px<0 || px>height() || py<0 || py>width()){
 			return Color();
@@ -227,6 +229,7 @@ protected:
 		return avg(avg(t1,t2,wy),avg(t3,t4,wy),wx);
 	}
 	void unloadV()const override{
+		// std::cerr<<"bufferImage unload"<<std::endl;
 		buf.clear();
 	}
 };
@@ -254,7 +257,7 @@ class RectangleAnimation:public BufferImage,public MappedAnimation{
 	int height=0;
 	Point begin,end;
 public:
-	RectangleAnimation(pAnim source,int w,int h,Point begin_,Point end_):MappedAnimation(source),width(w),height(h),begin(begin_),end(end_){}
+	RectangleAnimation(const pAnim& source,int w,int h,const Point& begin_,const Point& end_):MappedAnimation(source),width(w),height(h),begin(begin_),end(end_){}
 	SWAP(RectangleAnimation,nullptr,0,0,Point(),Point()){
 		BufferImage::swap(o);
 		MappedAnimation::swap(o);
@@ -272,13 +275,15 @@ protected:
 		MappedAnimation::loadV();
 		// std::cerr<<"MappedAnimation::loadV()\n";
 
-		buf={width,height};
+		if(buf.empty()){
+			buf={width,height};
+		}
 		Vector step=end-begin;
 		step={step.real()/width,step.imag()/height};
 		// std::cerr<<"loading source="<<source()<<"\n";
 		for(int i=0;i<height;++i){
 			for(int j=0;j<width;++j){
-				buf[i][j]=(*source())[begin+i*step.imag()+j*step.real()];
+				buf[i][j]=(*source())[begin+Vector(j*step.real(),i*step.imag())];
 			}
 		}
 		// std::cerr<<"loading source return\n";

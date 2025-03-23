@@ -2,6 +2,7 @@
 #include <string>
 #include <thread>
 #include <cassert>
+#include <iostream>
 
 namespace my_ffmpeg{
 
@@ -27,7 +28,9 @@ template class Codec<Packet,Frame,avcodec_send_packet,avcodec_receive_frame>;
 template<class fromT,class toT,int(*send_)(AVCodecContext*,const typename std::decay<decltype(*fromT().data())>::type*),int(*receive_)(AVCodecContext*,decltype(toT().data()))>
 void Codec<fromT,toT,send_,receive_>::open(){
 	context->thread_count=std::thread::hardware_concurrency();
-	assert(!avcodec_open2(context,codec,&options));
+	if(avcodec_open2(context,codec,&options)<0){
+		throw CodecError("Cannot open codec");
+	}
 }
 
 template<class fromT,class toT,int(*send_)(AVCodecContext*,const typename std::decay<decltype(*fromT().data())>::type*),int(*receive_)(AVCodecContext*,decltype(toT().data()))>
@@ -35,7 +38,9 @@ void Codec<fromT,toT,send_,receive_>::writeStream()const{
 	if(!context){
 		return;
 	}
-	avcodec_parameters_from_context(stream->codecpar,context);
+	if(avcodec_parameters_from_context(stream->codecpar,context)<0){
+		throw CodecError("avcodec_parameters_from_context failed");
+	}
 }
 
 template<class fromT,class toT,int(*send_)(AVCodecContext*,const typename std::decay<decltype(*fromT().data())>::type*),int(*receive_)(AVCodecContext*,decltype(toT().data()))>
@@ -43,7 +48,9 @@ void Codec<fromT,toT,send_,receive_>::readStream(){
 	if(!stream){
 		return;
 	}
-	avcodec_parameters_to_context(context,stream->codecpar);
+	if(avcodec_parameters_to_context(context,stream->codecpar)<0){
+		throw CodecError("avcodec_parameters_to_context failed");
+	}
 	context->pkt_timebase=stream->time_base;
 }
 
@@ -104,7 +111,7 @@ vector<toT> Codec<fromT,toT,send_,receive_>::receive(int maxCount){
 }
 
 template<class fromT,class toT,int(*send_)(AVCodecContext*,const typename std::decay<decltype(*fromT().data())>::type*),int(*receive_)(AVCodecContext*,decltype(toT().data()))>
-void Codec<fromT,toT,send_,receive_>::flush(){
+void Codec<fromT,toT,send_,receive_>::end(){
 	send(flushBuffer());
 	send_(context,nullptr);
 	send({});

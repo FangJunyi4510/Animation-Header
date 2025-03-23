@@ -10,10 +10,6 @@ Frame::~Frame()noexcept{
 void Frame::unref()const{
 	av_frame_unref(m_data);
 }
-AVFrame* Frame::data()const{
-	assert(m_data && "Frame data NULL! ");
-	return m_data;
-}
 
 VideoFrame::VideoFrame():VideoFrame(0,0){}
 VideoFrame::VideoFrame(int width,int height,Color color):data(height,RGBALine(width,color)){}
@@ -29,15 +25,6 @@ VideoFrame::VideoFrame(my_ffmpeg::Frame frame):VideoFrame(frame.data()->width,fr
 void VideoFrame::clear(){
 	*this=VideoFrame();
 }
-int VideoFrame::width()const{
-	if(data.empty()){
-		return 0;
-	}
-	return data[0].size();
-}
-int VideoFrame::height()const{
-	return data.size();
-}
 void VideoFrame::setWidth(int w){
 	for(auto& line:data){
 		line.resize(w);
@@ -45,12 +32,6 @@ void VideoFrame::setWidth(int w){
 }
 void VideoFrame::setHeight(int h){
 	data.resize(h);
-}
-VideoFrame::RGBALine& VideoFrame::operator[](int h){
-	return data[h];
-}
-const VideoFrame::RGBALine& VideoFrame::operator[](int h)const{
-	return data[h];
 }
 my_ffmpeg::VideoFormat VideoFrame::format()const{
 	return {width(),height(),AV_PIX_FMT_RGBA64};
@@ -62,13 +43,7 @@ my_ffmpeg::Frame VideoFrame::toFrame()const{
 	ret.data()->format=AV_PIX_FMT_RGBA64;
 	av_frame_get_buffer(ret.data(),0);
 	for(int i=0;i<height();++i){
-		for(int j=0;j<width();++j){
-			uint16_t* pixel=reinterpret_cast<uint16_t*>(ret.data()->data[0]+(ret.data()->linesize[0]*i+4*sizeof(uint16_t)*j));
-			pixel[0]=data[i][j].red;
-			pixel[1]=data[i][j].green;
-			pixel[2]=data[i][j].blue;
-			pixel[3]=data[i][j].alpha;
-		}
+		memcpy(ret.data()->data[0]+ret.data()->linesize[0]*i,data[i].data(),width()*sizeof(Color));
 	}
 	return ret;
 }
@@ -95,6 +70,9 @@ AudioBuffer::AudioBuffer(my_ffmpeg::AudioFormat fmt):
 	m_format(fmt),data(m_format.channelLayout.nb_channels),curFormat(m_format),converter(curFormat,m_format){}
 void AudioBuffer::push(const vector<my_ffmpeg::Frame>& frames){
 	for(const auto& frame:frames){
+		if(AudioFormat(frame).sampleFormat==-1){
+			continue;
+		}
 		if(frame!=curFormat){
 			flushConverter();
 			converter.swap(my_ffmpeg::SwResample(frame,m_format));
@@ -115,7 +93,10 @@ int AudioBuffer::sampleBytes()const{
 	return av_get_bytes_per_sample(m_format.sampleFormat);
 }
 my_ffmpeg::Frame AudioBuffer::pop(int frameSize){
-	assert(size()>=frameSize && "pop frameSize > size! ");
+	frameSize=std::min(size(),frameSize);
+	if(frameSize==0){
+		return Frame();
+	}
 	if(int(data[0].size())<frameSize){
 		flushConverter();
 	}
@@ -136,7 +117,6 @@ my_ffmpeg::Frame AudioBuffer::pop(int frameSize){
 	return ret;
 }
 vector<my_ffmpeg::Frame> AudioBuffer::pop(int frameSize,int count){
-	assert(size()>=frameSize*count && "pop frameSize*count > size! ");
 	vector<my_ffmpeg::Frame> ret;
 	for(int i=0;i<count;++i){
 		ret.push_back(pop(frameSize));
@@ -144,6 +124,9 @@ vector<my_ffmpeg::Frame> AudioBuffer::pop(int frameSize,int count){
 	return ret;
 }
 vector<my_ffmpeg::Frame> AudioBuffer::flush(int frameSize){
+	if(frameSize==0){
+		frameSize=1024;
+	}
 	vector<my_ffmpeg::Frame> ret;
 	while(size()>=frameSize){
 		ret.push_back(pop(frameSize));

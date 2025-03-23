@@ -39,6 +39,12 @@ target_link_libraries(FFmpegEntity PRIVATE
 	/lib/x86_64-linux-gnu/libswresample.so
 )
 
+# 在 CMakeLists.txt 中添加 Sanitizers
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_options(-fsanitize=address,undefined)
+    add_link_options(-fsanitize=address,undefined)
+endif()
+
 # 防止裁减未使用符号，似乎暂时不需要
 # target_link_options(FFmpegEntity INTERFACE 
 # 	"-Wl,--whole-archive"

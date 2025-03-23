@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <vector>
 #include <string>
+#include <stdexcept>
 
 namespace my_ffmpeg{
 
@@ -25,9 +26,26 @@ T avg(const T& a,const T& b,const W& wa){
 	return avg(a,b,wa,1-wa);
 }
 using std::max;
+using std::string;
 
 using ull=unsigned long long;
 using ushort=unsigned short;
+
+
+class FFmpegError:public std::runtime_error{
+public:
+	FFmpegError(const string& error):std::runtime_error(error){}
+};
+
+class FileError:public FFmpegError{
+public:
+	FileError(const string& error):FFmpegError(error){}
+};
+
+class CodecError:public FFmpegError{
+public:
+	CodecError(const string& error):FFmpegError(error){}
+};
 
 }
 

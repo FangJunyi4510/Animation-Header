@@ -1,10 +1,60 @@
 #include "Formats.h"
 #include "Frame.h"
+#include <map>
+#include <mutex>
 
 namespace my_ffmpeg{
 
-Swscale::Swscale(VideoFormat src,VideoFormat dst):
-    context(sws_getContext(src.width,src.height,src.pix_fmt,dst.width,dst.height,dst.pix_fmt,SWS_BILINEAR,nullptr,nullptr,nullptr)){}
+bool operator<(const VideoFormat& a,const VideoFormat& b){
+	if(a.pix_fmt!=b.pix_fmt){
+		return a.pix_fmt<b.pix_fmt;
+	}
+	if(a.width!=b.width){
+		return a.width<b.width;
+	}
+	return a.height<b.height;
+}
+
+class SwscaleBuffer{
+	std::map<std::pair<VideoFormat,VideoFormat>,SwsContext*> bufferedSwscale;
+	std::mutex bufferMutex;
+	void clear(){
+		for(const auto& [f,p]:bufferedSwscale){
+			sws_freeContext(p);
+		}
+		bufferedSwscale.clear();
+	}
+public:
+	~SwscaleBuffer(){
+		clear();
+	}
+	SwsContext* pop(const VideoFormat& src,const VideoFormat& dst){
+		std::unique_lock<std::mutex> locker(bufferMutex);
+		auto p=bufferedSwscale.find({src,dst});
+		if(p==bufferedSwscale.end()){
+			return nullptr;
+		}
+		auto ret=p->second;
+		bufferedSwscale.erase(p);
+		return ret;
+	}
+	void push(SwsContext* p,const VideoFormat& src,const VideoFormat& dst){
+		if(!p || src.pix_fmt==-1 || dst.pix_fmt==-1){
+			return;
+		}
+		std::unique_lock<std::mutex> locker(bufferMutex);
+		if(bufferedSwscale.size()>=1024){
+			clear();
+		}
+		bufferedSwscale[{src,dst}]=p;
+	}
+}bufferS;
+
+Swscale::Swscale(const VideoFormat& src,const VideoFormat& dst):m_src(src),m_dst(dst){
+	if(!(context=bufferS.pop(src,dst))){
+		context=sws_getContext(src.width,src.height,src.pix_fmt,dst.width,dst.height,dst.pix_fmt,SWS_FAST_BILINEAR,nullptr,nullptr,nullptr);
+	}
+}
 
 Frame Swscale::scale(const Frame& src)const{
 	Frame ret;
@@ -12,7 +62,7 @@ Frame Swscale::scale(const Frame& src)const{
 	return ret;
 }
 Swscale::~Swscale()noexcept{
-	sws_freeContext(context);
+	bufferS.push(context,m_src,m_dst);
 }
 
 VideoFormat::VideoFormat(const Frame& frame):VideoFormat(frame.data()->width,frame.data()->height,AVPixelFormat(frame.data()->format)){}

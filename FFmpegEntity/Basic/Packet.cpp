@@ -8,7 +8,6 @@ Packet::~Packet()noexcept{
 	av_packet_free(&m_data);
 }
 AVPacket* Packet::data()const{
-	assert(m_data && "Packet data NULL! ");
 	return m_data;
 }
 void Packet::unref()const{
