@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1090</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1090</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="File">
+    <property name="title">
+     <string>文件</string>
+    </property>
+    <addaction name="newFile"/>
+    <addaction name="openFile"/>
+    <addaction name="saveFile"/>
+    <addaction name="saveAsFile"/>
+    <addaction name="separator"/>
+    <addaction name="inportFile"/>
+    <addaction name="exportFile"/>
+    <addaction name="separator"/>
+    <addaction name="exit"/>
+   </widget>
+   <widget class="QMenu" name="Edit">
+    <property name="title">
+     <string>编辑</string>
+    </property>
+    <addaction name="undo"/>
+    <addaction name="redo"/>
+    <addaction name="separator"/>
+    <addaction name="addUnit"/>
+    <addaction name="deleteUnit"/>
+    <addaction name="copyUnit"/>
+    <addaction name="paste"/>
+    <addaction name="separator"/>
+    <addaction name="connect"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="View">
+    <property name="title">
+     <string>视图</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="Playing">
+    <property name="title">
+     <string>播放</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="Setting">
+    <property name="title">
+     <string>设置</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="Help">
+    <property name="title">
+     <string>帮助</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="Tools">
+    <property name="title">
+     <string>工具</string>
+    </property>
+   </widget>
+   <addaction name="File"/>
+   <addaction name="Edit"/>
+   <addaction name="View"/>
+   <addaction name="Playing"/>
+   <addaction name="Setting"/>
+   <addaction name="Tools"/>
+   <addaction name="Help"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="newFile">
+   <property name="text">
+    <string>新建</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="openFile">
+   <property name="text">
+    <string>打开</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="saveFile">
+   <property name="text">
+    <string>保存</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="saveAsFile">
+   <property name="text">
+    <string>另存为</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="inportFile">
+   <property name="text">
+    <string>导入</string>
+   </property>
+  </action>
+  <action name="exportFile">
+   <property name="text">
+    <string>导出</string>
+   </property>
+  </action>
+  <action name="exit">
+   <property name="text">
+    <string>退出</string>
+   </property>
+  </action>
+  <action name="addUnit">
+   <property name="text">
+    <string>添加单位</string>
+   </property>
+  </action>
+  <action name="deleteUnit">
+   <property name="text">
+    <string>删除单位</string>
+   </property>
+  </action>
+  <action name="connect">
+   <property name="text">
+    <string>连接 / 断开连接</string>
+   </property>
+  </action>
+  <action name="undo">
+   <property name="text">
+    <string>撤销</string>
+   </property>
+  </action>
+  <action name="redo">
+   <property name="text">
+    <string>重做</string>
+   </property>
+  </action>
+  <action name="copyUnit">
+   <property name="text">
+    <string>复制单位</string>
+   </property>
+  </action>
+  <action name="paste">
+   <property name="text">
+    <string>粘贴</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

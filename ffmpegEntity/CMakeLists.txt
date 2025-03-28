@@ -4,19 +4,33 @@ project(FFmpegEntity)
 
 # 所有源文件
 set(SOURCES
-	Basic/Basic.cpp
-	Basic/Color.cpp
-	Basic/Formats.cpp
-	Basic/Frame.cpp
-	Basic/Packet.cpp
-	Codec/Codec.cpp
-	Codec/Decoder.cpp
-	Codec/Encoder.cpp
-	Codec/VideoEncoder.cpp
-	Codec/AudioEncoder.cpp
-	Format/AVFormat.cpp
-	Format/AVInput.cpp
-	Format/AVOutput.cpp
+    Basic/Basic.cpp
+    Basic/Color.cpp
+    Basic/Formats.cpp
+    Basic/Frame.cpp
+    Basic/Packet.cpp
+    Codec/Codec.cpp
+    Codec/Decoder.cpp
+    Codec/Encoder.cpp
+    Codec/VideoEncoder.cpp
+    Codec/AudioEncoder.cpp
+    Format/AVFormat.cpp
+    Format/AVInput.cpp
+    Format/AVOutput.cpp
+
+    Basic/Basic.h
+    Basic/Color.h
+    Basic/Formats.h
+    Basic/Frame.h
+    Basic/Packet.h
+    Codec/Codec.h
+    Codec/Decoder.h
+    Codec/Encoder.h
+    Codec/VideoEncoder.h
+    Codec/AudioEncoder.h
+    Format/AVFormat.h
+    Format/AVInput.h
+    Format/AVOutput.h
 )
 
 add_library(FFmpegEntity ${SOURCES})
