@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "editscene.h"
+#include <QLabel>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -18,8 +20,12 @@ public:
 
 private slots:
     void on_addUnit_triggered();
+    void on_exit_triggered();
+    void on_info_change(const QString& info);
 
 private:
     Ui::MainWindow *ui;
+    EditScene scene;
+    QLabel info;
 };
 #endif // MAINWINDOW_H

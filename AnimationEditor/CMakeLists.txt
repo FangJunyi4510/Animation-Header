@@ -17,6 +17,14 @@ qt_add_executable(AnimationEditor
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
+    node.h node.cpp
+    editscene.h editscene.cpp
+
+    nodeport.h nodeport.cpp
+    settable.h settable.cpp
+    nodesettingsdialog.h nodesettingsdialog.cpp nodesettingsdialog.ui
+    processor.h processor.cpp
+    processorfactory.h processorfactory.cpp
 )
 
 target_link_libraries(AnimationEditor
